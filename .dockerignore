@@ -1,0 +1,9 @@
+.*
+*.pyc
+*/*.pyc
+*/*/*.pyc
+*/*/*/*.pyc
+Makefile
+README.md
+Dockerfile
+docker-compose.yml
