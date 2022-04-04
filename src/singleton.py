@@ -1,3 +1,9 @@
+# this singleton is bit different.
+# get_instance() will not create the first instance.
+# it will just return the previously created instances.
+# clients need to first instantiate an instance
+
+
 class SingletonMeta(type):
     def __init__(cls, cls_name, cls_bases_tuple, cls_attr_dict):
         cls._instance = None

@@ -14,6 +14,11 @@ def current_timestamp():
 
 
 class CacheItem(object):
+    """
+    CacheItem is a wrapper for the value that is stored in local cache.
+    - Each item stores the expiry_timestamp when its stored in local cache
+    - expiry_timestamp is used to determine the validity of the item
+    """
 
     def __init__(self, value, expiry_seconds):
         self.value = value
@@ -27,6 +32,26 @@ class CacheItem(object):
 
 
 class RedisCache(SingletonMixin):
+    """
+    - RedisCache implements the local cache with LRU eviction policy.
+    - it maintains a connection with the backing Redis instance.
+    - LRU Cache:
+      - when ever an item is read or added, it will be moved to end of the queue
+      - so, the LRU item will be at the front of the queue and will be evicted if required
+    - put_item():
+      - will first update backing Redis with the new key-value pair
+      - on successful updation to Redis, it will update the local cache with key-value pair.
+      - if the cache is full, it will evict the LRU item to accomodate the new key-value pair
+    - get_item():
+      - will first look into the local cache if the requested key is available and if has not
+        expired. if so, value from the cache will be returned
+      - if item in local cache has expired, it will be removed from local cache
+      - if key is not available in local cache, it will fetch the key-value pair from Redis
+        and will return it.
+      - before returning key-value pair, local cache will be updated with the key-value pair.
+      - if the key is not available in Redis, a None value with status-code 404 will be returned
+    """
+
     def __init__(self, redis_server, redis_port,
                  capacity, expiry_seconds,
                  *args, **kwargs):
@@ -52,7 +77,10 @@ class RedisCache(SingletonMixin):
                 raise Exception('Item Expired')
             self.lru_que.move_to_end(key)
             log.info(f'RC::> Fetched value from local cache. Key: {key}')
-            return item.get_value()
+            return {
+                'value': item.get_value(),
+                'source': 'local'
+            }
         except Exception as ex:
             # either key is not present in local cache or it has expired.
             # need to fetch it from redis-backend
@@ -65,10 +93,16 @@ class RedisCache(SingletonMixin):
                 raise HTTPError(status_code=500, log_message=lmsg)
             if not value:
                 log.info(f'RC::> Cache miss on Redis. Key: {key}')
-                return ''
+                return {
+                    'value': None,
+                    'source': 'redis'
+                }
             self._update_local_cache(key, value)
             log.info(f'RC::> Fetched value from Redis. Key: {key}')
-            return value
+            return {
+                'value': value,
+                'source': 'redis'
+            }
 
     def put_item(self, key, value):
         # first store it in the redis database
@@ -89,3 +123,13 @@ class RedisCache(SingletonMixin):
         if len(self.lru_que) > self.capacity:
             (k, _) = self.lru_que.popitem(last=False)
             log.info(f'RC::> Evicted LRU item. Key: {k}')
+
+    def flush_entries(self):
+        self.lru_que.clear()
+
+    def get_cache_info(self):
+        return {
+            'capacity': self.capacity,
+            'occupancy': len(self.lru_que),
+            'keys': list(self.lru_que.keys())
+        }
