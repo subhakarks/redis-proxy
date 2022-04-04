@@ -1,6 +1,7 @@
 import time
 import logging
 from redis import Redis
+from threading import RLock
 from tornado.web import HTTPError
 from collections import OrderedDict
 from src.singleton import SingletonMixin
@@ -56,10 +57,11 @@ class RedisCache(SingletonMixin):
                  capacity, expiry_seconds,
                  *args, **kwargs):
         _, _ = args, kwargs
-        self.redis = Redis(host=redis_server, port=redis_port)
+        self.lock = RLock()
         self.capacity = capacity
         self.lru_que = OrderedDict()
         self.expiry = expiry_seconds
+        self.redis = Redis(host=redis_server, port=redis_port)
         try:
             if self.redis.ping() is True:
                 log.info('RC::> Established connection to Redis backend')
@@ -70,17 +72,18 @@ class RedisCache(SingletonMixin):
 
     def get_item(self, key):
         try:
-            item = self.lru_que[key]
-            if item.has_expired():
-                del self.lru_que[key]
-                log.info(f'RC::> Local cache expired. Key: {key}')
-                raise Exception('Item Expired')
-            self.lru_que.move_to_end(key)
-            log.info(f'RC::> Fetched value from local cache. Key: {key}')
-            return {
-                'value': item.get_value(),
-                'source': 'local'
-            }
+            with self.lock:
+                item = self.lru_que[key]
+                if item.has_expired():
+                    del self.lru_que[key]
+                    log.info(f'RC::> Local cache expired. Key: {key}')
+                    raise Exception('Item Expired')
+                self.lru_que.move_to_end(key)
+                log.info(f'RC::> Fetched value from local cache. Key: {key}')
+                return {
+                    'value': item.get_value(),
+                    'source': 'local'
+                }
         except Exception as ex:
             # either key is not present in local cache or it has expired.
             # need to fetch it from redis-backend
@@ -97,7 +100,8 @@ class RedisCache(SingletonMixin):
                     'value': None,
                     'source': 'redis'
                 }
-            self._update_local_cache(key, value)
+            with self.lock:
+                self._update_local_cache(key, value)
             log.info(f'RC::> Fetched value from Redis. Key: {key}')
             return {
                 'value': value,
@@ -113,7 +117,8 @@ class RedisCache(SingletonMixin):
             log.error(f'RC::> {lmsg}. Reason: {str(ex)}')
             raise HTTPError(status_code=500, log_message=lmsg)
         # next cache the key and value locally
-        self._update_local_cache(key, value)
+        with self.lock:
+            self._update_local_cache(key, value)
         log.info(f'RC::> Stored Key: {key}, Value: {value}')
         return key
 
@@ -125,11 +130,16 @@ class RedisCache(SingletonMixin):
             log.info(f'RC::> Evicted LRU item. Key: {k}')
 
     def flush_entries(self):
-        self.lru_que.clear()
+        with self.lock:
+            self.lru_que.clear()
 
     def get_cache_info(self):
+        with self.lock:
+            occupancy = len(self.lru_que)
+            cached_keys = list(self.lru_que.keys())
+
         return {
+            'keys': cached_keys,
+            'occupancy': occupancy,
             'capacity': self.capacity,
-            'occupancy': len(self.lru_que),
-            'keys': list(self.lru_que.keys())
         }
