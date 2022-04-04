@@ -31,7 +31,7 @@ Redis-Proxy is implemented in this project.
 - Redis-Proxy maintains a connection to the the Backing-Redis
 - Redis-Proxy maintains an internal LRU cache and first does a lookup into this local cache
 - If the local cache look-up fails, Redis-Proxy then fetches the value from Backing-Redis
-- Redis-Proxy can parallely serve multiple clients up to configurable maximum limit
+- Redis-Proxy can parallely serve multiple clients upto a configurable maximum limit
 - Proxy uses Python's `RLock` for thread synchronization while accessing the shared cache
 
 ```
