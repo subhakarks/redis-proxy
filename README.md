@@ -9,6 +9,7 @@ Below diagram depicts the high-level overview of Redis-Proxy.
 ### Components:
 #### Clients:
 Clients communicate with Redis-Proxy using `HTTP GET` to fetch the value of required keys
+
 Example:
 
      ```
@@ -28,7 +29,7 @@ Redis-Proxy is implemented in this project.
 - Redis-Proxy uses Tornado's IO event loop and asynchronous, non-blocking co-routines
 - Proxy listens on a configurable address and port for the client requests
 - Redis-Proxy maintains a connection to the the Backing-Redis
-- Redis-Proxy maintains an internal LRU cache and first does a lookup into cache.
+- Redis-Proxy maintains an internal LRU cache and first does a lookup into this local cache
 - If the local cache look-up fails, Redis-Proxy then fetches the value from Backing-Redis
 - Redis-Proxy can parallely serve multiple clients up to configurable maximum limit
 - Proxy uses Python's `RLock` for thread synchronization while accessing the shared cache
