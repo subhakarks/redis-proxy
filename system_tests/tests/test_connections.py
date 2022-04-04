@@ -3,6 +3,10 @@ from base import BaseTests, REDIS_DB_SIZE
 
 
 class TestConnections(BaseTests):
+    """
+    Test connections to redis and redis-proxy
+    """
+
     def test_redis_ping(self):
         self.assertEqual(True, self.redis.ping())
         print('\nVerified connection to Redis')

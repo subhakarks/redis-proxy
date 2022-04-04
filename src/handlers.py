@@ -57,6 +57,7 @@ class ProxyHandler(BaseHandler):
         self.write(ret)
 
     async def put(self, key, *args, **kwargs):
+        # should have probably used POST instead of PUT
         value = self.request.body
         # don't allow dict values as Redis doesn't support them
         # we can store them as bytes and clients can do json.loads() on them
