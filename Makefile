@@ -17,3 +17,13 @@ stop:
 
 run: build
 	docker run ${DOCKER_RUN_OPTS} $(DOCKER_IMAGE)
+
+build-test:
+	docker image build --tag "redis-proxy_system_tests:latest" system_tests
+
+test: build-test
+	docker-compose up --build --remove-orphans system_tests
+
+test2: build build-test
+	docker-compose -f docker-compose-tests.yml up --detach --remove-orphans --scale system_tests=0
+	docker-compose -f docker-compose-tests.yml up --remove-orphans system_tests

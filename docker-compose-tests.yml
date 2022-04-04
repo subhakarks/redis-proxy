@@ -4,11 +4,20 @@ services:
   redis:
     image: redis:alpine
     container_name: backing-redis
+
   redis_proxy:
     image: redis_proxy:latest
     ports:
       - ${PROXY_PORT}:${PROXY_PORT}
-    env_file: .env
+    env_file: .env_system_tests
     depends_on:
       - redis
     container_name: redis-proxy
+
+  system_tests:
+    image: redis-proxy_system_tests:latest
+    env_file: .env_system_tests
+    depends_on:
+      - redis
+      - redis_proxy
+    container_name: redis-proxy-tests
