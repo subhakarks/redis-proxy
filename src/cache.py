@@ -90,9 +90,9 @@ class RedisCache(SingletonMixin):
             _ = ex
             try:
                 value = self.redis.get(key)
-            except Exception:
+            except Exception as exi:
                 lmsg = f'GET failed on Redis. Key: {key}'
-                log.error(f'RC::> {lmsg}. Reason: {str(ex)}')
+                log.error(f'RC::> {lmsg}. Reason: {str(exi)}')
                 raise HTTPError(status_code=500, log_message=lmsg)
             if not value:
                 log.info(f'RC::> Cache miss on Redis. Key: {key}')
