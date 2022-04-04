@@ -15,7 +15,7 @@ services:
     container_name: redis-proxy
 
   system_tests:
-    image: redis-proxy_system_tests:latest
+    image: redis_proxy_system_tests:latest
     env_file: .env_system_tests
     depends_on:
       - redis

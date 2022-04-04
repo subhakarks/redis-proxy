@@ -1,13 +1,16 @@
 VERSION := "latest"
-PACKAGE := "redis_proxy"
+PROXY_PACKAGE := "redis_proxy"
+SYSTEM_TESTS := "system_tests"
+PROXY_TESTS_PACKAGE := "redis_proxy_system_tests"
+
 DOCKER_BUILD_OPTS := --tag
-DOCKER_IMAGE := ${PACKAGE}:${VERSION}
 DOCKER_COMPOSE_DOWN_OPTS := --volumes
 DOCKER_COMPOSE_UP_OPTS := --detach --remove-orphans
-DOCKER_RUN_OPTS := -d -p 8956:8956 --name "redis-proxy-instance"
+DOCKER_PROXY_IMAGE := ${PROXY_PACKAGE}:${VERSION}
+DOCKER_PROXY_TESTS_IMAGE := ${PROXY_TESTS_PACKAGE}:${VERSION}
 
 build:
-	docker image build ${DOCKER_BUILD_OPTS} $(DOCKER_IMAGE) .
+	docker image build ${DOCKER_BUILD_OPTS} $(DOCKER_PROXY_IMAGE) .
 
 start: build
 	docker-compose up ${DOCKER_COMPOSE_UP_OPTS}
@@ -15,15 +18,12 @@ start: build
 stop:
 	docker-compose down ${DOCKER_COMPOSE_DOWN_OPTS}
 
-run: build
-	docker run ${DOCKER_RUN_OPTS} $(DOCKER_IMAGE)
-
 build-test:
-	docker image build --tag "redis-proxy_system_tests:latest" system_tests
+	docker image build ${DOCKER_BUILD_OPTS} ${DOCKER_PROXY_TESTS_IMAGE} ${SYSTEM_TESTS}
 
-test: build-test
-	docker-compose up --build --remove-orphans system_tests
+test: build build-test
+	docker-compose -f docker-compose-tests.yml up ${DOCKER_COMPOSE_UP_OPTS} --scale ${SYSTEM_TESTS}=0
+	docker-compose -f docker-compose-tests.yml up ${SYSTEM_TESTS}
 
-test2: build build-test
-	docker-compose -f docker-compose-tests.yml up --detach --remove-orphans --scale system_tests=0
-	docker-compose -f docker-compose-tests.yml up --remove-orphans system_tests
+test-stop:
+	docker-compose -f docker-compose-tests.yml down ${DOCKER_COMPOSE_DOWN_OPTS}

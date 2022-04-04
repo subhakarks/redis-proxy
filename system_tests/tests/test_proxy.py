@@ -13,11 +13,21 @@ class TestProxy(BaseTests):
         print('\nVerified GET on non-existent key')
 
     def test_get_valid_key(self):
+        # verify GET on an existing key
         redis_val = self.redis.get(9).decode('utf-8')
         resp = self.proxy_request(method='GET', path='9')
         self.assertEqual(redis_val, resp['value'])
         self.assertEqual(200, resp['status_code'])
         print('\nVerified GET on valid existent key')
+
+        # verify PUT and GET of a new key using proxy
+        resp = self.proxy_request(method='PUT', path='999', data='9999')
+        self.assertEqual(200, resp['status_code'])
+        resp = self.proxy_request(method='GET', path='999')
+        self.assertEqual(200, resp['status_code'])
+        self.assertEqual('9999', resp['value'])
+        print('\n Verified PUT and GET using proxy')
+
         # verify update of a key
         resp = self.proxy_request(method='PUT', path='9', data='9999')
         self.assertEqual(200, resp['status_code'])
