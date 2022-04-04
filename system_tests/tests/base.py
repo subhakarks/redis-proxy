@@ -12,6 +12,11 @@ REDIS_VALUE_SIZE = 16
 class BaseTests(unittest.TestCase):
 
     def populate_redis_data(self):
+        """
+        - Clears redis-proxy cache
+        - Clears redis database
+        - Populates redis database with keys 1-15 and random string values
+        """
         self.clear_cache()
         self.redis.flushdb()
         for idx in range(1, REDIS_DB_SIZE + 1):
