@@ -36,8 +36,12 @@ Redis-Proxy is implemented in this project.
 
 ```
    Code:
-   - main.py
-   - src/handlers.py
+    - main.py
+    - src/handlers.py
+
+   Logging:
+    - Redis-Proxy logs all the operations within the container
+    - Logs location: /redis_proxy/logs/redis_proxy.log
 ```
 
 #### Redis-Proxy LRU Cache:
