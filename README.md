@@ -102,7 +102,7 @@ MAX_CONCURRENT_REQUESTS = 11
   - system_tests/tests/test_cache.py
 ```
 
-### Instructions to run the Redis-Proxy and system tests:
+## Instructions to run the Redis-Proxy and system tests:
 - To run Redis-Proxy and Backing-Redis
 ```
   - git clone https://github.com/subhakarks/redis-proxy.git
@@ -123,13 +123,13 @@ MAX_CONCURRENT_REQUESTS = 11
   - make test-stop
     - Stops all the containers
 ```
-#### Platform Requirements:
+## Platform Requirements:
 - BASH
 - GNU Make
 - Docker version 20.10.13 or above
 - Docker Compose version 2
 
-### Time Spent:
+## Time Spent:
 - Initial project environment setup: 3 hours
 - Development of Tornado Application: 1 hour
 - Design and development of handlers: 2 hours
@@ -137,8 +137,8 @@ MAX_CONCURRENT_REQUESTS = 11
 - Design and development system tests: 2 hours
 - Documentation: 1 hour
 
-### Omitted Requirements:
+## Omitted Requirements:
 - Redis Client Protocol between Redis-Proxy to Backing-Redis due to lack of time
-  #### Known Issues and Caveats:
-  - Issues while reading `MAX_CONCURRENT_REQUESTS` from environment while creating `ThreadPoolExecutor` in `handlers.py`
-  - Hence reading `MAX_CONCURRENT_REQUESTS` from `settings.py`
+## Known Issues and Caveats:
+- Issues while reading `MAX_CONCURRENT_REQUESTS` from environment while creating `ThreadPoolExecutor` in `handlers.py`
+- Hence reading `MAX_CONCURRENT_REQUESTS` from `settings.py`
