@@ -2,7 +2,7 @@
 
 ## High-level Architecture Overview:
 
-Below diagram depicts the high-level overview of Redis-Proxy.
+Below diagram depicts the high-level overview of Redis-Proxy
 
 <img src="./redis-proxy-overview.png" width="512"/>
 
@@ -55,7 +55,7 @@ Redis-Proxy is implemented in this project.
   - src/singleton.py
   - src/cache.py
 ```
-##### Algorithmic Complexity for LRU Cache operations
+##### Algorithmic Complexity for LRU Cache operations:
 - LRU Cache is implemented using Python's standard `OrderedDict`
 - Time Complexity to get, set, delete and move operations of `OrderedDict` is O(1)
 - Each entry of the LRU cache has its own expiry time and there is no associated additional complexity
@@ -65,7 +65,7 @@ Redis-Proxy is implemented in this project.
 - Its a standard containerized Redis downloaded from Docker Hub
 
 
-### Configuration
+### Configuration:
 - `.env` file with-in the project can be used to configure Redis-Proxy
 - At startup, `docker-compose` with-in the `Makefile` uses the `.env` file and passes the configuration
    parameters to Redis-Proxy as environment variables
@@ -87,7 +87,7 @@ CACHE_CAPACITY = 1500
 MAX_CONCURRENT_REQUESTS = 11
 ```
 
-### End-to-End System Tests
+### End-to-End System Tests:
 - This project contains a set of end-to-end systems tests that can be run against the Redis-Proxy
 - Individual system test cases are written using Python's `unittest` framework
 - When invoked, a new container gets launched and runs the system tests using `pytest`
@@ -102,7 +102,7 @@ MAX_CONCURRENT_REQUESTS = 11
   - system_tests/tests/test_cache.py
 ```
 
-### Instructions to run the Redis-Proxy and system tests
+### Instructions to run the Redis-Proxy and system tests:
 - To run Redis-Proxy and Backing-Redis
 ```
   - git clone https://github.com/subhakarks/redis-proxy.git
@@ -123,13 +123,13 @@ MAX_CONCURRENT_REQUESTS = 11
   - make test-stop
     - Stops all the containers
 ```
-#### Platform Requirements
+#### Platform Requirements:
 - BASH
 - GNU Make
 - Docker version 20.10.13 or above
 - Docker Compose version 2
 
-### Time Spent
+### Time Spent:
 - Initial project environment setup: 3 hours
 - Development of Tornado Application: 1 hour
 - Design and development of handlers: 2 hours
@@ -139,6 +139,6 @@ MAX_CONCURRENT_REQUESTS = 11
 
 ### Omitted Requirements:
 - Redis Client Protocol between Redis-Proxy to Backing-Redis due to lack of time
-  #### Known Issues and Caveats
+  #### Known Issues and Caveats:
   - Issues while reading `MAX_CONCURRENT_REQUESTS` from environment while creating `ThreadPoolExecutor` in `handlers.py`
   - Hence reading `MAX_CONCURRENT_REQUESTS` from `settings.py`
